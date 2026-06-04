@@ -1,2 +1,2 @@
 # file-organizer
-File organizer. Little project for vanox03 first public repo. 
+The first plan is simple. A File Organizer that plugs in to your computer.
