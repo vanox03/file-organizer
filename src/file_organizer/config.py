@@ -73,7 +73,7 @@ def _parse_config(data: object) -> OrganizerConfig:
     seen_extensions: set[str] = set()
     for raw_category, raw_extensions in raw_rules.items():
         category = _validate_category(raw_category)
-        if not isinstance(raw_extensions, list) or not raw_extensions:
+        if not isinstance(raw_extensions, (list, tuple)) or not raw_extensions:
             raise ConfigError(f"Rule {category!r} must be a non-empty TOML array.")
 
         extensions = tuple(_normalize_extension(item, category) for item in raw_extensions)

@@ -50,8 +50,10 @@ def plan_actions(
         if source.is_symlink() or not source.is_file():
             continue
 
+        relative = source.relative_to(root)
         resolved_source = source.resolve()
-        relative = resolved_source.relative_to(root)
+        if not resolved_source.is_relative_to(root):
+            continue
         if resolved_source in excluded or _is_hidden(relative):
             continue
         if relative.parts[0] in config.category_names:

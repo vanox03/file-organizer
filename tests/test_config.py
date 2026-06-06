@@ -31,6 +31,16 @@ uncategorized = "Misc"
     assert config.category_for(Path("notes.txt")) == "Misc"
 
 
+def test_settings_only_config_uses_default_rules(tmp_path: Path) -> None:
+    config_path = tmp_path / "settings.toml"
+    config_path.write_text('[settings]\nuncategorized = "Misc"\n', encoding="utf-8")
+
+    config = load_config(config_path)
+
+    assert config.category_for(Path("photo.jpg")) == "Images"
+    assert config.category_for(Path("unknown.xyz")) == "Misc"
+
+
 @pytest.mark.parametrize(
     "content",
     [
