@@ -1,0 +1,8 @@
+[rules]
+Pictures = ["bmp", "gif", "jpeg", "jpg", "png", "svg", "webp"]
+Documents = ["csv", "doc", "docx", "md", "pdf", "txt"]
+Media = ["aac", "flac", "m4a", "mp3", "mov", "mp4", "wav", "webm"]
+Archives = ["7z", "gz", "rar", "tar", "zip"]
+
+[settings]
+uncategorized = "Other"

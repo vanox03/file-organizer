@@ -1,0 +1,23 @@
+name: Bug report
+description: Report incorrect or unsafe behavior
+title: "[Bug]: "
+labels: ["bug"]
+body:
+  - type: textarea
+    attributes:
+      label: What happened?
+      description: Include the command, expected behavior, and actual behavior.
+    validations:
+      required: true
+  - type: textarea
+    attributes:
+      label: Reproduction
+      description: Provide the smallest reproducible directory layout and configuration.
+    validations:
+      required: true
+  - type: input
+    attributes:
+      label: Environment
+      description: Operating system and Python version
+    validations:
+      required: true
