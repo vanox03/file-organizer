@@ -1,3 +1,5 @@
+import errno
+import os
 from pathlib import Path
 
 import pytest
@@ -71,6 +73,46 @@ def test_execute_refuses_destination_created_after_plan(tmp_path: Path) -> None:
         execute_actions(actions)
 
     assert source.exists()
+    assert destination.read_text(encoding="utf-8") == "existing"
+
+
+def test_execute_falls_back_to_exclusive_copy_across_filesystems(
+    tmp_path: Path, monkeypatch
+) -> None:
+    source = tmp_path / "notes.txt"
+    source.write_text("notes", encoding="utf-8")
+    actions = plan_actions(tmp_path, load_config())
+
+    def raise_cross_device(*args, **kwargs) -> None:
+        raise OSError(errno.EXDEV, "Cross-device link")
+
+    monkeypatch.setattr(os, "link", raise_cross_device)
+
+    execute_actions(actions)
+
+    assert not source.exists()
+    assert actions[0].destination.read_text(encoding="utf-8") == "notes"
+
+
+def test_exclusive_copy_fallback_never_removes_existing_destination(
+    tmp_path: Path, monkeypatch
+) -> None:
+    source = tmp_path / "notes.txt"
+    source.write_text("source", encoding="utf-8")
+    actions = plan_actions(tmp_path, load_config())
+    destination = actions[0].destination
+    destination.parent.mkdir()
+    destination.write_text("existing", encoding="utf-8")
+
+    def raise_cross_device(*args, **kwargs) -> None:
+        raise OSError(errno.EXDEV, "Cross-device link")
+
+    monkeypatch.setattr(os, "link", raise_cross_device)
+
+    with pytest.raises(FileExistsError):
+        execute_actions(actions)
+
+    assert source.read_text(encoding="utf-8") == "source"
     assert destination.read_text(encoding="utf-8") == "existing"
 
 

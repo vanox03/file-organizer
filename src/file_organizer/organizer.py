@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
+import os
 from pathlib import Path
 import shutil
 
@@ -73,7 +74,33 @@ def plan_actions(
 def execute_actions(actions: list[MoveAction]) -> None:
     """Execute planned moves, refusing to overwrite destinations created meanwhile."""
     for action in actions:
-        if action.destination.exists():
-            raise FileExistsError(f"Destination already exists: {action.destination}")
         action.destination.parent.mkdir(parents=True, exist_ok=True)
-        shutil.move(str(action.source), str(action.destination))
+        try:
+            os.link(action.source, action.destination, follow_symlinks=False)
+        except FileExistsError:
+            raise FileExistsError(f"Destination already exists: {action.destination}") from None
+        except OSError:
+            _copy_exclusive(action.source, action.destination)
+        else:
+            try:
+                action.source.unlink()
+            except OSError:
+                action.destination.unlink(missing_ok=True)
+                raise
+
+
+def _copy_exclusive(source: Path, destination: Path) -> None:
+    """Move by copying into an exclusively created destination."""
+    destination_created = False
+    try:
+        with destination.open("xb") as destination_file:
+            destination_created = True
+            with source.open("rb") as source_file:
+                shutil.copyfileobj(source_file, destination_file)
+        shutil.copystat(source, destination, follow_symlinks=False)
+    except OSError:
+        if destination_created:
+            destination.unlink(missing_ok=True)
+        raise
+
+    source.unlink()

@@ -51,3 +51,15 @@ def test_config_inside_target_directory_is_not_moved(
     assert exit_code == 0
     assert "Organized 1 file(s)." in capsys.readouterr().out
     assert config.exists()
+
+
+def test_path_resolution_error_is_reported(monkeypatch, capsys) -> None:
+    def raise_resolution_error(self, strict=False):
+        raise RuntimeError("Symlink loop")
+
+    monkeypatch.setattr(Path, "resolve", raise_resolution_error)
+
+    exit_code = main(["organize", "."])
+
+    assert exit_code == 2
+    assert "error: Symlink loop" in capsys.readouterr().err

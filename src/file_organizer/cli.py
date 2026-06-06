@@ -45,10 +45,10 @@ def _format_move(source: Path, destination: Path, root: Path) -> str:
 
 def main(argv: list[str] | None = None) -> int:
     args = build_parser().parse_args(argv)
-    root = args.directory.expanduser().resolve()
     excluded_paths = {args.config} if args.config else set()
 
     try:
+        root = args.directory.expanduser().resolve()
         config = load_config(args.config)
         actions = plan_actions(
             root,
@@ -56,7 +56,7 @@ def main(argv: list[str] | None = None) -> int:
             recursive=args.recursive,
             excluded_paths=excluded_paths,
         )
-    except (ConfigError, NotADirectoryError, OSError) as error:
+    except (ConfigError, NotADirectoryError, OSError, RuntimeError) as error:
         print(f"error: {error}", file=sys.stderr)
         return 2
 
