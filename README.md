@@ -4,3 +4,4 @@ I'm going to build it alone for now but i'd like some contributors.
 
 Contributors:
 1. Divano-OSS
+2. Adrem-UXX
